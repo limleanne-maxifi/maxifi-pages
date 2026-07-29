@@ -119,14 +119,6 @@ footer a{color:var(--blue);text-decoration:none}
         <div class="slide-bg" style="background-image:url(images/shortlist.webp)" aria-hidden="true"></div>
         <img src="images/shortlist.webp" alt="A buyer question flows into an AI answer, which produces a vendor shortlist where a cited company is marked trusted" width="1200" height="630" loading="lazy" decoding="async">
       </figure>
-      <figure class="slide" role="group" aria-roledescription="slide">
-        <div class="slide-bg" style="background-image:url(images/competitors.webp)" aria-hidden="true"></div>
-        <img src="images/competitors.webp" alt="If AI cannot cite you, competitors shape the answer - content missing from the answer shown beside content cited by AI" width="524" height="425" loading="lazy" decoding="async">
-      </figure>
-      <figure class="slide" role="group" aria-roledescription="slide">
-        <div class="slide-bg" style="background-image:url(images/report.webp)" aria-hidden="true"></div>
-        <img src="images/report.webp" alt="An AI Visibility Report showing a visibility score out of 100 and which competitors AI cites instead" width="1100" height="616" loading="lazy" decoding="async">
-      </figure>
       <figure class="slide slide-quote" role="group" aria-roledescription="slide">
         <blockquote class="q">
           <div class="q-rule" aria-hidden="true"></div>
@@ -257,7 +249,7 @@ function unlock(e){
       dotWrap=document.getElementById('car-dots'),
       playBtn=document.getElementById('car-play'),
       calm=window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-      DELAY=5000, i=0, timer=null, playing=false, dots=[];
+      DELAY=5000, i=0, timer=null, playing=false, kbFocus=false, dots=[];
 
   slides.forEach(function(s,n){
     s.setAttribute('aria-label',(n+1)+' of '+slides.length);
@@ -265,7 +257,7 @@ function unlock(e){
     d.className='car-dot'; d.type='button';
     d.setAttribute('role','tab');
     d.setAttribute('aria-label','Go to slide '+(n+1));
-    d.addEventListener('click',function(){stop();go(n);});
+    d.addEventListener('click',function(){nav(n);});
     dotWrap.appendChild(d); dots.push(d);
   });
   dotWrap.setAttribute('role','tablist');
@@ -279,25 +271,28 @@ function unlock(e){
     dots.forEach(function(d,x){d.setAttribute('aria-selected',x===i?'true':'false');});
   }
   function tick(){go(i+1);}
-  function start(){
-    if(playing||calm) return;
-    playing=true; timer=setInterval(tick,DELAY);
-    view.setAttribute('aria-live','off');
-    playBtn.textContent='Pause'; playBtn.setAttribute('aria-label','Pause slideshow');
-  }
-  function stop(){
-    playing=false; clearInterval(timer); timer=null;
-    view.setAttribute('aria-live','polite');
-    playBtn.textContent='Play'; playBtn.setAttribute('aria-label','Play slideshow');
-  }
 
-  root.querySelector('.next').addEventListener('click',function(){stop();go(i+1);});
-  root.querySelector('.prev').addEventListener('click',function(){stop();go(i-1);});
-  playBtn.addEventListener('click',function(){playing?stop():start();});
+  /* One place decides whether the timer runs. `playing` is user intent and is
+     changed only by the Pause button, so transient halts (keyboard focus, a
+     hidden tab) never clear it and the loop resumes on its own. */
+  function sync(){
+    if(timer){clearInterval(timer);timer=null;}
+    if(playing&&!kbFocus&&!document.hidden) timer=setInterval(tick,DELAY);
+    view.setAttribute('aria-live',playing?'off':'polite');
+    playBtn.textContent=playing?'Pause':'Play';
+    playBtn.setAttribute('aria-label',(playing?'Pause':'Play')+' slideshow');
+  }
+  /* Manual navigation keeps the loop running - it only restarts the interval so
+     the slide just chosen gets a full turn. */
+  function nav(n){go(n);sync();}
+
+  root.querySelector('.next').addEventListener('click',function(){nav(i+1);});
+  root.querySelector('.prev').addEventListener('click',function(){nav(i-1);});
+  playBtn.addEventListener('click',function(){playing=!playing;sync();});
 
   root.addEventListener('keydown',function(e){
-    if(e.key==='ArrowRight'){e.preventDefault();stop();go(i+1);}
-    if(e.key==='ArrowLeft'){e.preventDefault();stop();go(i-1);}
+    if(e.key==='ArrowRight'){e.preventDefault();nav(i+1);}
+    if(e.key==='ArrowLeft'){e.preventDefault();nav(i-1);}
   });
   /* Swipe: the arrows are hidden on phones, so dragging has to work there. */
   var x0=null;
@@ -305,21 +300,26 @@ function unlock(e){
   view.addEventListener('pointerup',function(e){
     if(x0===null) return;
     var dx=e.clientX-x0; x0=null;
-    if(Math.abs(dx)>40){stop();go(i+(dx<0?1:-1));}
+    if(Math.abs(dx)>40) nav(i+(dx<0?1:-1));
   });
   view.addEventListener('pointercancel',function(){x0=null;});
   view.addEventListener('dragstart',function(e){e.preventDefault();});
 
-  root.addEventListener('mouseenter',function(){if(playing){clearInterval(timer);timer=null;}});
-  root.addEventListener('mouseleave',function(){if(playing&&!timer)timer=setInterval(tick,DELAY);});
-  root.addEventListener('focusin',stop);
-  document.addEventListener('visibilitychange',function(){
-    if(document.hidden){if(timer){clearInterval(timer);timer=null;}}
-    else if(playing&&!timer)timer=setInterval(tick,DELAY);
+  /* Halt for keyboard focus only, so someone tabbing through is not chased by a
+     moving carousel. A mouse click also sets focus but must not stop the loop.
+     Hover no longer pauses: the carousel sits high on the page and a resting
+     cursor was enough to stall it indefinitely. */
+  root.addEventListener('focusin',function(){
+    var a=document.activeElement,vis=true;
+    try{vis=!!(a&&a.matches&&a.matches(':focus-visible'));}catch(err){vis=true;}
+    kbFocus=vis; sync();
   });
+  root.addEventListener('focusout',function(){kbFocus=false;sync();});
+  document.addEventListener('visibilitychange',sync);
 
   go(0);
-  if(calm){stop();} else {start();}
+  playing=!calm;
+  sync();
 })();
 </script>
 </body>
