@@ -16,7 +16,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:44px}
 .logo-img{height:44px;width:auto;display:block}
 .car{position:relative;margin:0 0 40px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--card)}
-.car-view{position:relative;aspect-ratio:16/9;background:#f2f0ea;overflow:hidden;container-type:inline-size}
+.car-view{position:relative;aspect-ratio:16/9;background:#f2f0ea;overflow:hidden;container-type:inline-size;touch-action:pan-y}
 .slide{position:absolute;inset:0;margin:0;opacity:0;visibility:hidden;transition:opacity .6s ease,visibility .6s}
 .slide.on{opacity:1;visibility:visible}
 /* Slides hold mixed aspect ratios (ultrawide screenshot, portrait headshot), so
@@ -30,12 +30,11 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 /* Padding is px, not %, so the content always clears the fixed-width nav
    arrows (38px + 12px inset; 32px on narrow screens). */
 .slide-quote{background:var(--bg);display:flex;align-items:center;padding:0 58px}
-.q{display:flex;align-items:center;gap:4%;width:100%}
-.slide .q-avatar{flex:0 0 16%;width:16%;height:auto;aspect-ratio:1;border-radius:999px;object-fit:cover;object-position:50% 20%;position:static}
-.q-body{flex:1;min-width:0}
-.q-rule{width:26px;height:3px;background:var(--blue);margin-bottom:3.5%}
-.q-text{font-size:19px;font-size:clamp(12.5px,4.1cqw,24px);line-height:1.28;font-weight:700;letter-spacing:-.01em;color:var(--ink)}
-.q-who{margin-top:.75em;font-size:12px;font-size:clamp(9px,2.1cqw,13px);line-height:1.45;color:var(--mut)}
+.q{width:100%}
+.q-rule{width:26px;height:3px;background:var(--blue);margin-bottom:2.5%}
+.q-text{font-size:15px;font-size:clamp(11px,2.85cqw,19px);line-height:1.44;font-weight:600;letter-spacing:-.005em;color:var(--ink);text-wrap:pretty}
+.q-who{display:flex;align-items:center;gap:.85em;margin-top:3%;font-size:11px;font-size:clamp(7.5px,1.7cqw,12.5px);line-height:1.4;color:var(--mut)}
+.slide .q-avatar{flex:0 0 auto;width:auto;height:2.9em;aspect-ratio:1;border-radius:999px;object-fit:cover;object-position:50% 20%;position:static}
 .q-who b{display:block;color:var(--ink);font-weight:600}
 .slide figcaption{position:absolute;left:0;right:0;bottom:0;padding:34px 18px 14px;font-size:14px;color:#fff;background:linear-gradient(to top,rgba(0,0,0,.72),transparent)}
 .car-nav{position:absolute;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.92);color:var(--ink);font-size:17px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
@@ -48,7 +47,9 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 .car-play{border:0;background:none;color:var(--mut);font-size:12px;cursor:pointer;padding:2px 4px}
 .car-play:hover{color:var(--blue)}
 .car :focus-visible{outline:2px solid var(--blue);outline-offset:2px}
-@media (max-width:520px){.slide figcaption{font-size:13px}.car-nav{width:32px;height:32px}.slide-quote{padding:0 46px}}
+/* Taller frame on phones: 16:9 leaves the quote only a few px of headroom,
+   which real font metrics could tip into clipping. */
+@media (max-width:520px){.car-view{aspect-ratio:3/2}.slide figcaption{font-size:13px}.car-nav{display:none}.slide-quote{padding:0 20px}}
 @media (prefers-reduced-motion:reduce){.slide{transition:none}}
 h1{font-size:36px;line-height:1.15;font-weight:800;margin-bottom:14px}
 h1 em{font-style:normal;color:var(--blue)}
@@ -123,22 +124,18 @@ footer a{color:var(--blue);text-decoration:none}
         <img src="images/competitors.webp" alt="If AI cannot cite you, competitors shape the answer - content missing from the answer shown beside content cited by AI" width="524" height="425" loading="lazy" decoding="async">
       </figure>
       <figure class="slide" role="group" aria-roledescription="slide">
-        <div class="slide-bg" style="background-image:url(images/dashboard.webp)" aria-hidden="true"></div>
-        <img src="images/dashboard.webp" alt="The Maxifi Digital dashboard showing mention rate, citation readiness and competitor visibility" width="519" height="367" loading="lazy" decoding="async">
-      </figure>
-      <figure class="slide" role="group" aria-roledescription="slide">
         <div class="slide-bg" style="background-image:url(images/report.webp)" aria-hidden="true"></div>
         <img src="images/report.webp" alt="An AI Visibility Report showing a visibility score out of 100 and which competitors AI cites instead" width="1100" height="616" loading="lazy" decoding="async">
       </figure>
       <figure class="slide slide-quote" role="group" aria-roledescription="slide">
-        <div class="q">
-          <img class="q-avatar" src="images/founder-avatar.webp" alt="Lim Le-Anne, founder of Maxifi Digital" width="256" height="256" loading="lazy" decoding="async">
-          <div class="q-body">
-            <div class="q-rule" aria-hidden="true"></div>
-            <p class="q-text">Led by a senior communications strategist with decades of experience across APAC and global markets.</p>
-            <p class="q-who"><b>Lim Le-Anne</b>Founder, Maxifi Digital &#183; Singapore</p>
-          </div>
-        </div>
+        <blockquote class="q">
+          <div class="q-rule" aria-hidden="true"></div>
+          <p class="q-text">&ldquo;Search is becoming answers. When your buyer asks ChatGPT who to trust in your category, you're either in that answer or you're not &mdash; and there's no page two. We help expert-led brands become the source AI engines cite, and we prove it with a before-and-after you can put in front of a board.&rdquo;</p>
+          <footer class="q-who">
+            <img class="q-avatar" src="images/founder-avatar.webp" alt="" width="256" height="256" loading="lazy" decoding="async">
+            <span><b>Lim Le-Anne</b>Founder, Maxifi Digital &#183; Singapore</span>
+          </footer>
+        </blockquote>
       </figure>
       <button class="car-nav prev" type="button" aria-label="Previous slide">&#8249;</button>
       <button class="car-nav next" type="button" aria-label="Next slide">&#8250;</button>
@@ -302,6 +299,17 @@ function unlock(e){
     if(e.key==='ArrowRight'){e.preventDefault();stop();go(i+1);}
     if(e.key==='ArrowLeft'){e.preventDefault();stop();go(i-1);}
   });
+  /* Swipe: the arrows are hidden on phones, so dragging has to work there. */
+  var x0=null;
+  view.addEventListener('pointerdown',function(e){x0=e.clientX;});
+  view.addEventListener('pointerup',function(e){
+    if(x0===null) return;
+    var dx=e.clientX-x0; x0=null;
+    if(Math.abs(dx)>40){stop();go(i+(dx<0?1:-1));}
+  });
+  view.addEventListener('pointercancel',function(){x0=null;});
+  view.addEventListener('dragstart',function(e){e.preventDefault();});
+
   root.addEventListener('mouseenter',function(){if(playing){clearInterval(timer);timer=null;}});
   root.addEventListener('mouseleave',function(){if(playing&&!timer)timer=setInterval(tick,DELAY);});
   root.addEventListener('focusin',stop);
