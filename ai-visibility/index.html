@@ -16,10 +16,14 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:44px}
 .logo-img{height:44px;width:auto;display:block}
 .car{position:relative;margin:0 0 40px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--card)}
-.car-view{position:relative;aspect-ratio:16/9;background:#f2f0ea}
+.car-view{position:relative;aspect-ratio:16/9;background:#f2f0ea;overflow:hidden}
 .slide{position:absolute;inset:0;margin:0;opacity:0;visibility:hidden;transition:opacity .6s ease,visibility .6s}
 .slide.on{opacity:1;visibility:visible}
-.slide img{width:100%;height:100%;object-fit:cover;display:block}
+/* Slides hold mixed aspect ratios (ultrawide screenshot, portrait headshot), so
+   the image is contained and a blurred copy of itself fills the frame behind it
+   - no crop, no letterbox bars. */
+.slide-bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(26px) saturate(1.15);transform:scale(1.18);opacity:.6;pointer-events:none}
+.slide img{position:relative;width:100%;height:100%;object-fit:contain;display:block}
 .slide figcaption{position:absolute;left:0;right:0;bottom:0;padding:34px 18px 14px;font-size:14px;color:#fff;background:linear-gradient(to top,rgba(0,0,0,.72),transparent)}
 .car-nav{position:absolute;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.92);color:var(--ink);font-size:17px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
 .car-nav:hover{background:#fff;border-color:var(--blue);color:var(--blue)}
@@ -84,26 +88,26 @@ footer a{color:var(--blue);text-decoration:none}
   <h1>Unlock AI Visibility That <em>Converts</em></h1>
   <p class="sub">Stop chasing clicks. Start commanding attention. Maxifi Digital helps leaders and brands cut through the noise with AI-powered visibility solutions designed for LinkedIn virality.</p>
 
-  <!-- Carousel: swap the four images/slide-*.svg placeholders for real .jpg/.webp
-       photos (1600x900). Add or delete slide figures freely - the dots, labels
-       and autoplay all derive from however many are present. -->
+  <!-- Carousel: add or delete slide figures freely - the dots, labels and
+       autoplay all derive from however many are present. Each slide needs its
+       image set twice: once on .slide-bg (the blurred fill) and once on the
+       <img> itself. Any aspect ratio works. -->
   <div class="car" id="car" role="group" aria-roledescription="carousel" aria-label="Maxifi Digital in action">
     <div class="car-view" id="car-view">
       <figure class="slide on" role="group" aria-roledescription="slide">
-        <img src="images/slide-1.svg" alt="Placeholder - replace with an image of your AI visibility audit" width="1600" height="900" decoding="async">
-        <figcaption>Find out where AI does - and doesn't - mention you.</figcaption>
+        <div class="slide-bg" style="background-image:url(images/asw-hub.webp)" aria-hidden="true"></div>
+        <img src="images/asw-hub.webp" alt="The Airspace World 2026 AI Visibility Hub homepage" width="1600" height="682" decoding="async">
+        <figcaption>Event content restructured into answer-ready assets AI engines can cite - long after the event.</figcaption>
       </figure>
       <figure class="slide" role="group" aria-roledescription="slide">
-        <img src="images/slide-2.svg" alt="Placeholder - replace with an image of your content work" width="1600" height="900" loading="lazy" decoding="async">
-        <figcaption>Content engineered for the depth signals algorithms reward.</figcaption>
+        <div class="slide-bg" style="background-image:url(images/founder.webp)" aria-hidden="true"></div>
+        <img src="images/founder.webp" alt="Le-Anne Lim, founder of Maxifi Digital" width="720" height="1079" loading="lazy" decoding="async">
+        <figcaption>Senior communications strategy across APAC and global markets.</figcaption>
       </figure>
       <figure class="slide" role="group" aria-roledescription="slide">
-        <img src="images/slide-3.svg" alt="Placeholder - replace with an image showing reach or exposure results" width="1600" height="900" loading="lazy" decoding="async">
-        <figcaption>Founder-led formats that earn 5x the reach of company pages.</figcaption>
-      </figure>
-      <figure class="slide" role="group" aria-roledescription="slide">
-        <img src="images/slide-4.svg" alt="Placeholder - replace with an image from a virality playbook" width="1600" height="900" loading="lazy" decoding="async">
-        <figcaption>Repeatable playbooks, not one-off lucky posts.</figcaption>
+        <div class="slide-bg" style="background-image:url(images/brand-card.webp)" aria-hidden="true"></div>
+        <img src="images/brand-card.webp" alt="Maxifi Digital - AI visibility for expert-led brands" width="1200" height="630" loading="lazy" decoding="async">
+        <figcaption>AI visibility for expert-led brands.</figcaption>
       </figure>
       <button class="car-nav prev" type="button" aria-label="Previous slide">&#8249;</button>
       <button class="car-nav next" type="button" aria-label="Next slide">&#8250;</button>
