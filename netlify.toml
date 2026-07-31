@@ -9,6 +9,15 @@
 [build.environment]
   NODE_VERSION = "20"
 
+## ── Functions ───────────────────────────────────────────────────────────────
+## netlify/functions/capture.mjs serves /demo/capture (routed by its own
+## `export const config = { path }`, so no redirect rule here). It holds
+## GROWTH_API_TOKEN server-side — that bearer token is a real secret and must
+## never reach the browser, unlike the build-injected demo token.
+[functions]
+  directory    = "netlify/functions"
+  node_bundler = "esbuild"
+
 ## ── Security headers (mirrors asw-hub; SAMEORIGIN because /demo/{slug} pages
 ##    embed the Visibility Value explainer in a same-origin iframe) ───────────
 [[headers]]
