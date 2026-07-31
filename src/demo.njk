@@ -774,9 +774,12 @@ $("#gate-form").addEventListener("submit", async (e) => {
         brand: $("#brand").value.trim() || null,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || null,
         top_competitors: CFG.competitor_names || [],
-        visibility_score: measured ? Math.round((r.named / r.responding) * 100) : null,
-        named_rate:       measured ? r.named / r.responding : null,
-        probe_results:    measured ? r.results : null
+        /* probe_results ONLY — the engine rejects 422 "pass either probe_results
+           or explicit metrics, not both". It derives named_rate itself and
+           deliberately leaves visibility_score null (probe-one carries no rank or
+           sentiment, so it refuses to guess a full score). Sending our own would
+           claim a measurement the engine declines to make. */
+        probe_results: measured ? r.results : null
       })
     });
     captured = res.ok;
@@ -857,14 +860,17 @@ async function run(){
   LAST_RUN = {
     brand, query, sample,
     named, responding: okCount,
-    results: settled.filter(s => s.d).map(s => ({
+    /* The frozen six-field probe-one shape the engine's summarize_probe_results()
+       reads. Responding engines only: it derives named_rate from the list length,
+       so including a failed engine would silently dilute the rate — same rule the
+       on-page score already follows ("responding engines only"). */
+    results: settled.filter(s => s.d && s.d.ok).map(s => ({
       engine: s.engine,
-      ok: !!s.d.ok,
       named: !!s.d.named,
-      model: s.d.model || null,
-      ms: s.d.ms ?? null,
+      verbatim_response: s.d.verbatim_response || "",
       citations: s.d.citations || [],
-      verbatim_response: s.d.verbatim_response || ""
+      model: s.d.model || null,
+      ms: s.d.ms ?? null
     }))
   };
 
