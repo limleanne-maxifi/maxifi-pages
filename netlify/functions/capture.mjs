@@ -1,14 +1,14 @@
 // Server-side lead capture for the /demo/{slug} email gate.
 //
 // Why a function and not a netlify.toml proxy: the engine's /growth/capture
-// requires `Authorization: Bearer <GROWTH_API_TOKEN>`, and that is a real
+// requires `Authorization: Bearer <GROWTH_API_SECRET>`, and that is a real
 // secret — unlike the demo token, it must never ship in the served HTML. A
 // static redirect cannot inject a header from an env var, so the token lives
 // in this function's runtime env and the browser only ever sees /demo/capture.
 // (This is the "edge function injecting the header server-side" that
 // src/_data/env.js flags as the proper fix for token exposure.)
 //
-// Degrades safely: with no GROWTH_API_TOKEN set it returns 503 and the page's
+// Degrades safely: with no GROWTH_API_SECRET set it returns 503 and the page's
 // Netlify Forms fallback still captures the lead. Deploying this before the
 // operator sets the env var is therefore a no-op, not a regression.
 
@@ -23,7 +23,7 @@ const json = (body, status) =>
 export default async (req) => {
   if (req.method !== "POST") return json({ ok: false, error: "method not allowed" }, 405);
 
-  const token = process.env.GROWTH_API_TOKEN;
+  const token = process.env.GROWTH_API_SECRET;
   if (!token) return json({ ok: false, error: "capture not configured" }, 503);
 
   let payload;
