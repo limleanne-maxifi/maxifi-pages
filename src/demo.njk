@@ -396,6 +396,8 @@ eleventyExcludeFromCollections: true
         <div><label class="fld" for="g-company">Company</label><input type="text" id="g-company" name="company" required autocomplete="organization"></div>
         <button class="mx-btn" type="submit" id="gate-submit">Email me the full result</button>
       </div>
+      {#- what consent_notice_version: "demo-gate-v1" refers to. Bump both together. -#}
+      <p class="gate-consent mx-meta">By requesting your result you agree we may email you about it.</p>
       <div class="gate-err" id="gate-err" hidden></div>
     </form>
   </div>
@@ -740,9 +742,49 @@ $("#gate-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const btn = $("#gate-submit"), err = $("#gate-err");
   err.hidden = true; btn.disabled = true; btn.textContent = "Sending…";
-  const data = new URLSearchParams(new FormData(e.target));
+  const fd = new FormData(e.target);
+  const data = new URLSearchParams(fd);
   data.set("brand", $("#brand").value.trim());
   data.set("query", $("#query").value.trim());
+
+  /* Two independent sinks, so a lead is lost only if both fail:
+     1. /demo/capture — the engine's lead store (via a Netlify Function that
+        holds the bearer token server-side). Carries the run, so a follow-up
+        knows what the prospect actually saw.
+     2. Netlify Forms — the original POST, kept as the fallback. */
+  const email = (fd.get("email") || "").toString().trim();
+  const r = LAST_RUN;
+  // Sample output is never sent as a measurement (CLAUDE.md: never claim a
+  // measurement the engine cannot take). A sample run still captures the lead.
+  const measured = !!r && !r.sample && r.responding > 0;
+
+  let captured = false;
+  try {
+    const res = await fetch("/demo/capture", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        slug: CFG.slug,
+        source: "demo_gate",
+        consent: true,
+        consent_notice_version: "demo-gate-v1",
+        dedupe_key: CFG.slug + ":" + email.toLowerCase(),
+        run_date: new Date().toISOString().slice(0, 10),
+        email,
+        contact_name: (fd.get("name") || "").toString().trim() || null,
+        brand: $("#brand").value.trim() || null,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || null,
+        top_competitors: CFG.competitor_names || [],
+        /* probe_results ONLY — the engine rejects 422 "pass either probe_results
+           or explicit metrics, not both". It derives named_rate itself and
+           deliberately leaves visibility_score null (probe-one carries no rank or
+           sentiment, so it refuses to guess a full score). Sending our own would
+           claim a measurement the engine declines to make. */
+        probe_results: measured ? r.results : null
+      })
+    });
+    captured = res.ok;
+  } catch (e) {}
+
   let delivered = false;
   try {
     const res = await fetch("/", { method: "POST",
@@ -750,17 +792,22 @@ $("#gate-form").addEventListener("submit", async (e) => {
     delivered = res.ok;
   } catch (e) {}
   // Unlock either way — a form-endpoint hiccup shouldn't strand a prospect —
-  // but tell them if the email copy didn't go through.
+  // but tell them only if BOTH sinks failed and we genuinely have nothing.
   try { localStorage.setItem(GATE_KEY, "1"); } catch (e) {}
-  mxTrack("gate_pass", { slug: CFG.slug, delivered });
+  mxTrack("gate_pass", { slug: CFG.slug, delivered, captured });
   liftGate();
-  if (!delivered){
+  if (!captured && !delivered){
     showNotice("Results unlocked. The emailed copy could not be sent just now — book a call or use the snapshot link and we'll send it manually.");
   }
   btn.disabled = false; btn.textContent = "Email me the full result";
 });
 
 /* ── run ── */
+/* Last completed run, hoisted out of run()'s local scope so the email gate can
+   send the measurement alongside the lead. Stays null until a run finishes, and
+   carries `sample` so illustrative output is never captured as measured. */
+let LAST_RUN = null;
+
 async function probeEngine(engine, payload){
   const res = await fetch(PROBE_URL, {
     method: "POST",
@@ -809,6 +856,23 @@ async function run(){
   else if (okCount === 0){ renderSummary(0, 0, brand); }   // no responders: notice, no score, no LIVE stamp
   else { renderSummary(named, okCount, brand); setRunMeta(sample); applyGate(); }
   if (sample){ showNotice("Safe demo mode — illustrative sample data, not live engine results."); $("#samplebar").hidden = false; }
+
+  LAST_RUN = {
+    brand, query, sample,
+    named, responding: okCount,
+    /* The frozen six-field probe-one shape the engine's summarize_probe_results()
+       reads. Responding engines only: it derives named_rate from the list length,
+       so including a failed engine would silently dilute the rate — same rule the
+       on-page score already follows ("responding engines only"). */
+    results: settled.filter(s => s.d && s.d.ok).map(s => ({
+      engine: s.engine,
+      named: !!s.d.named,
+      verbatim_response: s.d.verbatim_response || "",
+      citations: s.d.citations || [],
+      model: s.d.model || null,
+      ms: s.d.ms ?? null
+    }))
+  };
 
   btn.disabled = false; btn.textContent = "Run visibility test";
   return { okCount, auth, capped };
