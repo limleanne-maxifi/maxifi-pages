@@ -9,7 +9,7 @@
 [build.environment]
   NODE_VERSION = "20"
 
-## ── Security headers (mirrors asw-hub; SAMEORIGIN because /demo-{slug} pages
+## ── Security headers (mirrors asw-hub; SAMEORIGIN because /demo/{slug} pages
 ##    embed the Visibility Value explainer in a same-origin iframe) ───────────
 [[headers]]
   for = "/*"
@@ -22,53 +22,55 @@
 ## Per-prospect pitch pages: never indexed. Belt (this header) and braces
 ## (<meta name="robots" content="noindex"> in src/demo.njk). A prospect
 ## finding their own named pitch page in Google is a lost deal; a rival
-## finding it is worse.
+## finding it is worse. The nested path means one prefix rule covers every
+## demo page (and the probe/headline proxies, harmlessly).
 [[headers]]
-  for = "/demo-*"
+  for = "/demo/*"
   [headers.values]
     X-Robots-Tag = "noindex, nofollow"
 
 ## ── Engine probe proxy ──────────────────────────────────────────────────────
 ## status = 200 makes these rewrites/proxies: the browser call stays
 ## same-origin (no CORS), Netlify forwards the POST server-side to the
-## LIVE engine host. NOTE: the engine moved Render → RAILWAY (see
-## ai-visibility-engine/CLAUDE.md §Deployment); asw-hub's netlify.toml still
-## points at ai-visibility-engine.onrender.com — verify/fix that separately.
+## LIVE engine host. force = true so they win over any static path. The slug
+## "probe" is reserved (enforced in src/_data/demos.js). NOTE: the engine
+## moved Render → RAILWAY (see ai-visibility-engine/CLAUDE.md §Deployment);
+## asw-hub's netlify.toml still points at ai-visibility-engine.onrender.com —
+## verify/fix that separately at cutover.
 [[redirects]]
   from   = "/demo/probe"
   to     = "https://web-production-00ba0.up.railway.app/demo/probe"
   status = 200
   force  = true
 
-## $0 loss-panel endpoint (PR #36 in ai-visibility-engine) — proxied now so the
-## demo template can adopt the loss-first panel without another config change.
+## $0 loss-panel endpoint (ai-visibility-engine PR #36) — proxied now so the
+## demo template can adopt the loss-first panel later without a config change.
+## (The migrated pages themselves are deliberately NOT rewired to it yet.)
 [[redirects]]
   from   = "/demo/headline"
   to     = "https://web-production-00ba0.up.railway.app/demo/headline"
   status = 200
   force  = true
 
-## ── Continuity: the old asw-hub URL shape → the de facto rule ──────────────
-## (Only meaningful on this domain; the aswhub.maxifidigital.com originals need
-## their own 301s in asw-hub AFTER this site is live — see README.md §Cutover.)
+## Bare-path convenience: /demo/canso → /demo/canso/ etc.
 [[redirects]]
   from   = "/demo/canso"
-  to     = "/demo-canso/"
-  status = 301
-
-[[redirects]]
-  from   = "/demo/canso/"
-  to     = "/demo-canso/"
+  to     = "/demo/canso/"
   status = 301
 
 [[redirects]]
   from   = "/demo/ortus"
-  to     = "/demo-ortus/"
+  to     = "/demo/ortus/"
   status = 301
 
 [[redirects]]
-  from   = "/demo/ortus/"
-  to     = "/demo-ortus/"
+  from   = "/demo/nsas"
+  to     = "/demo/nsas/"
+  status = 301
+
+[[redirects]]
+  from   = "/demo/b2b"
+  to     = "/demo/b2b/"
   status = 301
 
 ## /ai-visibility/ stays a redirect stub (passthrough file) — links already

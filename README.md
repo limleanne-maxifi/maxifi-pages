@@ -5,18 +5,20 @@ Two things live here, one domain:
 1. **The lead-gen landing page** (`index.html` at the repo root) — the page
    ads point at. Served today by **GitHub Pages** (CNAME `ai.maxifidigital.com`).
 2. **Per-prospect AI-visibility demo pages** — `demos/{slug}.json` →
-   **`/demo-{slug}/`**, rendered by `src/demo.njk` (Eleventy). These need
+   **`/demo/{slug}/`**, rendered by `src/demo.njk` (Eleventy). These need
    **Netlify** (probe proxy + Forms email gate) and only go live after the
    cutover below.
 
 ## The rule (de facto, going forward)
 
 > **Every per-prospect demo page is a subpage of ai.maxifidigital.com at
-> `/demo-<company>` — one JSON config in `demos/`, zero code, zero
-> client-specific strings in the template.**
+> `/demo/<company>/` — one JSON config in `demos/`, zero code, zero
+> client-specific strings in the template.** (Nested, not `/demo-<company>`:
+> one path prefix covers robots rules, headers and analytics, and matches the
+> URL shape already shared from aswhub.)
 
 - Adding a prospect = adding `demos/{slug}.json` (copy `b2b.json`; schema in
-  `demos/README.md`). The page appears at `/demo-{slug}/` on the next build.
+  `demos/README.md`). The page appears at `/demo/{slug}/` on the next build.
 - Demo pages are **noindex** (meta + `X-Robots-Tag`) — they are pitch
   collateral shared by link, never search-landing pages. The lead-gen root
   stays indexable.
@@ -36,12 +38,19 @@ Current configs: `canso` (Airspace World — migrated from asw-hub),
 no stored mini-audit quotes exist, and none were invented; auto-run off),
 `b2b` (the copyable template).
 
+**Migration posture (operator decision, 2026-07-31): pages are kept AS-IS.**
+Content, behaviour and template match the asw-hub originals byte-for-byte
+except the hosting mechanics (URL, noindex, env-injected token, Railway
+proxy). No rewiring to the engine's v2 loss-first model (loss panel /
+`/demo/headline`) until the operator calls for it — the proxy is in place
+for when that day comes.
+
 ## Cutover runbook (operator; ~30 min; demo pages are dark until done)
 
 1. **Netlify**: New site from this repo. Build auto-detects `netlify.toml`.
    Set env var `DEMO_PAGE_TOKEN` = the engine's `DEMO_ACCESS_TOKEN` value.
-2. **Verify on the `*.netlify.app` URL**: `/` (landing), `/demo-canso/`,
-   `/demo-ortus/`, `/demo-nsas/`, `/demo-b2b/`; run a live probe on one page
+2. **Verify on the `*.netlify.app` URL**: `/` (landing), `/demo/canso/`,
+   `/demo/ortus/`, `/demo/nsas/`, `/demo/b2b/`; run a live probe on one page
    (checks the Railway proxy + token); submit the email gate (checks Forms —
    enable form detection in Site settings if submissions don't appear).
 3. **DNS**: point the `ai` CNAME at the Netlify site (replacing
@@ -50,8 +59,8 @@ no stored mini-audit quotes exist, and none were invented; auto-run off),
 4. **GitHub Pages**: unpublish (Settings → Pages) once DNS has propagated.
    The `CNAME` file can then be deleted from the repo.
 5. **asw-hub**: add 301s from `aswhub.maxifidigital.com/demo/canso/` and
-   `/demo/ortus/` to `https://ai.maxifidigital.com/demo-canso/` /
-   `/demo-ortus/` (and retire its `/CANSO-demo/` page the same way), and
+   `/demo/ortus/` to `https://ai.maxifidigital.com/demo/canso/` /
+   `/demo/ortus/` (and retire its `/CANSO-demo/` page the same way), and
    remove its `demos/` configs so the pages stop building there. **Do this
    only after step 3** — the redirect targets must exist first.
 6. **asw-hub probe proxy**: while in there, fix its `/demo/probe` proxy —
@@ -70,7 +79,7 @@ there (they'd be fetchable as raw files, which is fine — the repo is public).
 
 ```bash
 npm install
-npm start          # http://localhost:8080 — landing at /, demos at /demo-{slug}/
+npm start          # http://localhost:8080 — landing at /, demos at /demo/{slug}/
 ```
 
 Live-tester probes need the Netlify proxy (or point `PROBE_URL` at the

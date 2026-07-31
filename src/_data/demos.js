@@ -1,5 +1,5 @@
 // Loads every per-prospect demo config from the top-level `demos/` directory.
-// Each demos/{slug}.json becomes one generated page at /demo-{slug}/ via the
+// Each demos/{slug}.json becomes one generated page at /demo/{slug}/ via the
 // pagination in src/demo.njk. Adding a prospect = adding one JSON file here;
 // no template changes needed.
 const fs = require("fs");

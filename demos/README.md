@@ -1,6 +1,6 @@
 # Per-prospect demo configs
 
-Each `{slug}.json` here becomes a page at `/demo-{slug}/` (the de facto
+Each `{slug}.json` here becomes a page at `/demo/{slug}/` (the de facto
 rule — see the repo README), rendered by
 `src/demo.njk`. The template carries **zero client-specific strings** — the whole
 page (hero, ticker, preset queries, calculator seeds, CTAs) comes from the config.
@@ -11,14 +11,14 @@ page (hero, ticker, preset queries, calculator seeds, CTAs) comes from the confi
    `sector_label`, `brand_default`, `query_default` and `preset_queries`.
 2. Run the mini-audit and replace the `ticker_quotes` placeholders with real
    engine quotes (`cited: true/false`). **Never invent quotes.**
-3. Build (`npm run build`) — the page appears at `/demo-{slug}/`. Deploy lands it
+3. Build (`npm run build`) — the page appears at `/demo/{slug}/`. Deploy lands it
    live. Nothing else to change.
 
 ## Schema
 
 | Key | Meaning |
 | --- | --- |
-| `slug` | URL segment (`/demo-{slug}/`). `probe` is reserved (engine proxy). |
+| `slug` | URL segment (`/demo/{slug}/`). `probe` is reserved (engine proxy). |
 | `client_name` | Used in the hero, calculator heading, FAQ answers, `<title>`. |
 | `sector_label` | Chip above the hero headline. |
 | `ticker_tag` | Optional ticker label; defaults to `{client_name} · AI Visibility`. |
