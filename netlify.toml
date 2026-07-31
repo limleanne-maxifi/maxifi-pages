@@ -1,0 +1,77 @@
+# Netlify config for ai.maxifidigital.com (activates when this repo is
+# connected as a Netlify site — inert on GitHub Pages; see README.md §Cutover).
+
+[build]
+  base    = "."
+  publish = "_site"
+  command = "npm run clean && npm run build"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+## ── Security headers (mirrors asw-hub; SAMEORIGIN because /demo/{slug} pages
+##    embed the Visibility Value explainer in a same-origin iframe) ───────────
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options        = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy        = "strict-origin-when-cross-origin"
+    Permissions-Policy     = "geolocation=(), microphone=(), camera=()"
+
+## Per-prospect pitch pages: never indexed. Belt (this header) and braces
+## (<meta name="robots" content="noindex"> in src/demo.njk). A prospect
+## finding their own named pitch page in Google is a lost deal; a rival
+## finding it is worse. The nested path means one prefix rule covers every
+## demo page (and the probe/headline proxies, harmlessly).
+[[headers]]
+  for = "/demo/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+## ── Engine probe proxy ──────────────────────────────────────────────────────
+## status = 200 makes these rewrites/proxies: the browser call stays
+## same-origin (no CORS), Netlify forwards the POST server-side to the
+## LIVE engine host. force = true so they win over any static path. The slug
+## "probe" is reserved (enforced in src/_data/demos.js). NOTE: the engine
+## moved Render → RAILWAY (see ai-visibility-engine/CLAUDE.md §Deployment);
+## asw-hub's netlify.toml still points at ai-visibility-engine.onrender.com —
+## verify/fix that separately at cutover.
+[[redirects]]
+  from   = "/demo/probe"
+  to     = "https://web-production-00ba0.up.railway.app/demo/probe"
+  status = 200
+  force  = true
+
+## $0 loss-panel endpoint (ai-visibility-engine PR #36) — proxied now so the
+## demo template can adopt the loss-first panel later without a config change.
+## (The migrated pages themselves are deliberately NOT rewired to it yet.)
+[[redirects]]
+  from   = "/demo/headline"
+  to     = "https://web-production-00ba0.up.railway.app/demo/headline"
+  status = 200
+  force  = true
+
+## Bare-path convenience: /demo/canso → /demo/canso/ etc.
+[[redirects]]
+  from   = "/demo/canso"
+  to     = "/demo/canso/"
+  status = 301
+
+[[redirects]]
+  from   = "/demo/ortus"
+  to     = "/demo/ortus/"
+  status = 301
+
+[[redirects]]
+  from   = "/demo/nsas"
+  to     = "/demo/nsas/"
+  status = 301
+
+[[redirects]]
+  from   = "/demo/b2b"
+  to     = "/demo/b2b/"
+  status = 301
+
+## /ai-visibility/ stays a redirect stub (passthrough file) — links already
+## shared keep landing; crawlers only ever count the root.
