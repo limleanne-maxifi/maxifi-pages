@@ -72,3 +72,21 @@ and it says UK, fix it at source.
   repo's demo template. Writes **en-GB** deliberately for a European aviation
   audience — a locale choice for the reader, **not** a claim about where
   Maxifi is.
+
+## Not this repo — The Findable Candidate
+
+**The Findable Candidate** is a separate product: a jobseeker findability
+product whose capture spine runs as n8n workflows on `lloop.app.n8n.cloud`. It
+shares an operator with Maxifi Digital and nothing else — different product,
+different audience, different codebase. It has **no GitHub repo**; its workflows
+and runbook are delivered as a file bundle.
+
+The same n8n instance also hosts **JobLoop** (`WF1`–`WF4`), which is a different
+thing again and which the Findable Candidate build must never touch. Three
+separate concerns, one operator.
+
+Do not mix them. Nothing in this repo describes either, and their constraints
+(never touch JobLoop's `WF1`–`WF4`, no LinkedIn API or scraping) do not
+originate here. If a task mentions `lloop.app.n8n.cloud`, checklist capture,
+file orders or batch triggers, it is Findable Candidate work and belongs in
+that bundle.
