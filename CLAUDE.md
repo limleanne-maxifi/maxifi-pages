@@ -62,6 +62,34 @@ and it says UK, fix it at source.
   budget across five engines on every page view. Set it only for an active
   pitch.
 
+## The Findable Candidate (FC) — a separate product
+
+FC is the jobseeker findability product (checklist → candidate file). It is
+**not** the AI-visibility agency offer this repo's landing page sells. The
+branch `claude/findable-candidate-pages-*` exists here because FC's acquisition
+pages were scoped to this domain; the product's own material lives elsewhere.
+
+**Its knowledge base is not in this repo.** The `fc-source-review` skill reads
+`knowledge-base.md`, `kb-source-reviews.md` and `kb-changelog.md` "from the
+project" — those live in the operator's local FC project. Confirmed absent
+2026-08-11 by searching this repo, the whole container filesystem, the Notion
+workspace, and all 11 accessible GitHub repos (including a clone of `la-lim`,
+which turned out to be the agency marketing site).
+
+**Do not re-derive these:**
+
+- **The five-page acquisition set is blocked.** It needs the three approved
+  definition-page names, their target queries, and the KB. None are reachable.
+  Per the operator's stop condition: stop, and **do not invent replacement page
+  concepts**.
+- **Every FC factual statement must trace to the KB at a stated evidence tier.**
+  Without the KB every claim is `[EVIDENCE NEEDED]`. That is the blocker — not
+  a formatting detail, and not something good copywriting routes around.
+- **The S$9.80 pre-order window closed 10 August 2026.** It must not appear on
+  any page. Never claim places remain without a verified count.
+- **The capture spine is live in n8n, not in this repo.** State, invariants and
+  the open beehiiv work: `docs/fc-capture-spine.md`.
+
 ## Related repos
 
 - **`limleanne-maxifi/ai-visibility-engine`** — the engine behind `/demo/probe`
