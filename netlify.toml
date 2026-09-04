@@ -52,7 +52,12 @@
   status = 200
   force  = true
 
-## Bare-path convenience: /demo/canso → /demo/canso/ etc.
+## Bare-path convenience: /demo → /demo/ and /demo/slug → /demo/slug/ etc.
+[[redirects]]
+  from   = "/demo"
+  to     = "/demo/"
+  status = 301
+
 [[redirects]]
   from   = "/demo/canso"
   to     = "/demo/canso/"
