@@ -32,10 +32,15 @@ and it says UK, fix it at source.
 
 ## What this repo is
 
-`ai.maxifidigital.com` — two things on one domain:
+`ai.maxifidigital.com` — three things on one domain:
 
 1. **The lead-gen landing page** (`index.html`, repo root) — where ads point.
-2. **Per-prospect demo pages** — `demos/{slug}.json` → **`/demo/{slug}/`**,
+2. **Generic interactive demo** (`src/demo-interactive.njk` → **`/demo/`**) —
+   non-branded page where visitors enter any brand name and query; a staggered
+   animation resolves all five engines with illustrative results. Results are
+   clearly labelled illustrative throughout. Safe to share publicly as a sales
+   tool.
+3. **Per-prospect demo pages** — `demos/{slug}.json` → **`/demo/{slug}/`**,
    rendered by `src/demo.njk` (Eleventy). One JSON config per prospect; the
    template carries zero client-specific strings.
 
@@ -61,6 +66,23 @@ and it says UK, fix it at source.
 - **`brand_default` empty = no auto-run.** Each auto-run spends real engine
   budget across five engines on every page view. Set it only for an active
   pitch.
+
+## Open branches (unmerged as of 2026-09-04)
+
+These branches exist on `origin` and have not been merged to `main`. Do not
+delete them without checking with the operator.
+
+| Branch | Status | What it contains |
+|---|---|---|
+| `claude/dns-cutover-ai-maxifi-msbz0d` | **Active — not merged** | Engine lead capture (`netlify/functions/capture.mjs`), CNAME drop for Netlify, `demo.njk` probe_results fix, Netlify var rename to `GROWTH_API_SECRET`. Prerequisite for the Netlify cutover. |
+| `claude/landing-gaps-demo-cta` | **Active — not merged** | Surfaces the live demo on the landing page (`index.html`) and carries the canonical Singapore descriptor. |
+| `claude/findable-candidate-pages-yxuo7x` | Docs only | Records FC capture-spine state and open beehiiv work. |
+| `claude/wizardly-bardeen-1s9x4b` | Docs only | Marks The Findable Candidate as out of scope for this repo. |
+| `claude/demo-subpages-rewire` | **Empty** (0 commits ahead of main) — safe to delete |  |
+| `claude/hardwire-singapore-descriptor` | **Empty** (0 commits ahead of main) — safe to delete |  |
+
+The branch `claude/maxifi-demo-page-visual-jdw7by` was squash-merged (PR #6,
+2026-09-04) and can be deleted.
 
 ## Related repos
 
